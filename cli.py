@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import time
 
 import requests
 
@@ -25,7 +26,12 @@ def google_translate(target_lang: str, text: str) -> str:
     params = {"sl": "zh-CN", "hl": target_lang, "q": f"{text}"}
     proxies = {"https": cfg.proxy_address}
     timeout = cfg.remote_api_timeout
-    response = requests.get(url, params, timeout=timeout, proxies=proxies)
+    try:
+        response = requests.get(url, params, timeout=timeout, proxies=proxies)
+    except TimeoutError:
+        time.sleep(cfg.time_to_sleep)
+        response = requests.get(url, params, timeout=timeout, proxies=proxies)
+    time.sleep(cfg.time_to_sleep)
     if response.status_code == 200:
         pattern = '<div class="result-container">(.*?)</div>'
         raw_result = re.findall(pattern, response.text, re.S)[0]
@@ -64,7 +70,7 @@ def translate_srt_files(output_lang: list[str]) -> None:
                                 sys.exit(1)
                             texts_in_target_lang = text_in_target_lang.split('\n')
                             texts_in_target_lang = [
-                                text.capitalize() for text in texts_in_target_lang
+                                t[0].upper() + t[1:] for t in texts_in_target_lang
                             ]
                             texts_in_output_lang.append(texts_in_target_lang)
                         for i, line in enumerate(lines):
