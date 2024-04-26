@@ -24,13 +24,12 @@ if not os.path.exists(output_dir):
 def google_translate(target_lang: str, text: str) -> str:
     url = cfg.google_translate
     params = {"sl": "zh-CN", "hl": target_lang, "q": f"{text}"}
-    proxies = {"https": cfg.proxy_address}
     timeout = cfg.remote_api_timeout
     try:
-        response = requests.get(url, params, timeout=timeout, proxies=proxies)
+        response = requests.get(url, params, timeout=timeout)
     except TimeoutError:
         time.sleep(cfg.time_to_sleep)
-        response = requests.get(url, params, timeout=timeout, proxies=proxies)
+        response = requests.get(url, params, timeout=timeout)
     time.sleep(cfg.time_to_sleep)
     if response.status_code == 200:
         pattern = '<div class="result-container">(.*?)</div>'
