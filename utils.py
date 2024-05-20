@@ -1,15 +1,11 @@
 import os
 
 
-def remove_consecutive_newlines(lst: list[str]) -> list[str]:
+def remove_blank_subscript(lst: list[str]) -> list[str]:
     cleaned_list = []
-    prev_element = None
-    for element in lst:
-        if element == '\n' and prev_element == '\n':
-            continue
-        else:
-            cleaned_list.append(element)
-            prev_element = element
+    for i in range(len(lst)):
+        if i % 4 == 2 and lst[i] != "\n":
+            cleaned_list += lst[i - 2:i + 2]
     return cleaned_list
 
 

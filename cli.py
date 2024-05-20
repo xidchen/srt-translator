@@ -55,7 +55,7 @@ def translate_srt_files(output_lang: list[str]) -> None:
                 with open(input_file_path, 'r', encoding='utf-8') as f_in:
                     with open(output_file_path, 'w', encoding='utf-8') as f_out:
                         lines = f_in.readlines()
-                        lines = utils.remove_consecutive_newlines(lines)
+                        lines = utils.remove_blank_subscript(lines)
                         texts = [line for i, line in enumerate(lines) if i % 4 == 2]
                         text_in_input_lang = utils.drop_unnecessary_whitespace(
                             ''.join(texts)
