@@ -21,9 +21,10 @@ if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
 
-def google_translate(target_lang: str, text: str) -> str:
+def google_translate(source_lang: str, target_lang: str, text: str) -> str:
     url = cfg.google_translate
-    params = {"sl": "zh-CN", "hl": target_lang, "q": f"{text}"}
+    q = text.replace(cfg.single_enter, cfg.double_enter)
+    params = {"sl": source_lang, "hl": target_lang, "q": f"{q}"}
     timeout = cfg.remote_api_timeout
     try:
         response = requests.get(url, params, timeout=timeout)
@@ -35,13 +36,14 @@ def google_translate(target_lang: str, text: str) -> str:
         pattern = '<div class="result-container">(.*?)</div>'
         raw_result = re.findall(pattern, response.text, re.S)[0]
         result = raw_result.replace("&#39;", "'").replace("&quot;", '"')
+        result = result.replace(cfg.double_enter, cfg.single_enter)
         return result
     else:
         print(f"Google Translate failed {response.status_code}")
         return cfg.translate_error
 
 
-def translate_srt_files(output_lang: list[str]) -> None:
+def translate_srt_files(input_lang: str, output_lang: list[str]) -> None:
     for dirpath, _, filenames in os.walk(input_dir):
         for filename in filenames:
             if filename.endswith(cfg.input_srt_suffix):
@@ -61,9 +63,12 @@ def translate_srt_files(output_lang: list[str]) -> None:
                             ''.join(texts)
                         )
                         texts_in_output_lang = []
+                        source_lang = input_lang
                         for target_lang in output_lang:
                             text_in_target_lang = google_translate(
-                                target_lang=target_lang, text=text_in_input_lang
+                                source_lang=source_lang,
+                                target_lang=target_lang,
+                                text=text_in_input_lang
                             )
                             if text_in_target_lang == cfg.translate_error:
                                 sys.exit(1)
@@ -87,4 +92,4 @@ def translate_srt_files(output_lang: list[str]) -> None:
 
 
 if __name__ == "__main__":
-    translate_srt_files(cfg.output_lang)
+    translate_srt_files(cfg.input_lang, cfg.output_lang)
