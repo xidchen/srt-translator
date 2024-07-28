@@ -23,7 +23,7 @@ if not os.path.exists(output_dir):
 
 def google_translate(source_lang: str, target_lang: str, text: str) -> str:
     url = cfg.google_translate
-    q = text.replace(cfg.single_enter, cfg.double_enter)
+    q = text.replace(cfg.single_enter, cfg.pipe_double_enter)
     params = {"sl": source_lang, "hl": target_lang, "q": f"{q}"}
     timeout = cfg.remote_api_timeout
     try:
@@ -36,8 +36,10 @@ def google_translate(source_lang: str, target_lang: str, text: str) -> str:
         pattern = '<div class="result-container">(.*?)</div>'
         raw_result = re.findall(pattern, response.text, re.S)[0]
         result = raw_result.replace("&#39;", "'").replace("&quot;", '"')
+        result = result.replace(cfg.pipe_double_enter, cfg.single_enter)
         result = result.replace(cfg.double_enter, cfg.single_enter)
-        return result
+        final_result = result.strip()
+        return final_result
     else:
         print(f"Google Translate failed {response.status_code}")
         return cfg.translate_error
