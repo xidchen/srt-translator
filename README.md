@@ -1,4 +1,4 @@
-# srt-translator
+# vst-lite
 
 The aim of project is to batch translate SRT files.
 
